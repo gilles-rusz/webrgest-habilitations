@@ -1,7 +1,7 @@
 "use client";
 
 import { Lightbulb } from "lucide-react";
-import { canWork, findQual, progress, qualStatus } from "@/lib/model";
+import { canWork, dueSoon, findQual, progress, qualStatus } from "@/lib/model";
 import { useStore } from "@/lib/store";
 import { CHIP } from "./ui";
 
@@ -38,8 +38,8 @@ export function Matrix({ open }: { open: (id: string) => void }) {
                   const status = qualStatus(q, s);
                   return (
                     <td key={s.id} className="p-1 text-center">
-                      <button onClick={() => open(o.id)} className={`h-9 w-full min-w-14 rounded-lg border text-xs font-black ${CHIP[status]}`}>
-                        {status === "ok" ? "✓" : status === "unsigned" ? "À signer" : `${progress(q, s)}/${s.points.length}`}
+                      <button onClick={() => open(o.id)} className={`h-9 w-full min-w-14 rounded-lg border text-xs font-black ${status === "ok" && dueSoon(q, s) ? "border-orange-300 bg-orange-50 text-orange-700" : CHIP[status]}`}>
+                        {status === "ok" ? (dueSoon(q, s) ? "✓ Audit" : "✓") : status === "unsigned" ? "À signer" : status === "expired" ? "Expirée" : `${progress(q, s)}/${s.points.length}`}
                       </button>
                     </td>
                   );
@@ -70,6 +70,8 @@ export function Matrix({ open }: { open: (id: string) => void }) {
         <span className={`rounded-lg border px-2 py-1 ${CHIP.ok}`}>✓ Habilité et signé</span>
         <span className={`rounded-lg border px-2 py-1 ${CHIP.unsigned}`}>À signer : formé, papier non signé</span>
         <span className={`rounded-lg border px-2 py-1 ${CHIP.training}`}>3/5 : en formation</span>
+        <span className="rounded-lg border border-orange-300 bg-orange-50 px-2 py-1 text-orange-700">✓ Audit : à refaire sous 15 jours</span>
+        <span className={`rounded-lg border px-2 py-1 ${CHIP.expired}`}>Expirée : audit dépassé</span>
       </div>
 
       <div className="flex gap-2.5 rounded-2xl bg-sky-50 p-3 text-sm text-sky-900">

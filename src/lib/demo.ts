@@ -1,4 +1,4 @@
-import { today } from "./model";
+import { addMonths, pad } from "./model";
 import type { Category, Operator, Qualification, State, Station } from "./types";
 
 const station = (id: string, name: string, standard: string, needed: number, points: [Category, string][]): Station => ({
@@ -7,6 +7,7 @@ const station = (id: string, name: string, standard: string, needed: number, poi
   standard,
   needed,
   points: points.map(([category, label], i) => ({ id: `${id}-p${i + 1}`, category, label })),
+  validityMonths: 2,
 });
 
 export const demoStations = (): Station[] => [
@@ -47,8 +48,12 @@ export const demoStations = (): Station[] => [
 export function demoState(): State {
   const stations = demoStations();
   const by = Object.fromEntries(stations.map((s) => [s.id, s]));
-  const date = today();
-  const q = (id: string, done: number | "all", signed = true): Qualification => {
+  const daysAgo = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const q = (id: string, done: number | "all", signed = true, date = daysAgo(20)): Qualification => {
     const pts = by[id].points;
     const checked = pts.slice(0, done === "all" ? pts.length : done).map((p) => p.id);
     const complete = checked.length === pts.length;
@@ -66,12 +71,12 @@ export function demoState(): State {
     settings: { site: "Entrepôt démo", shiftStart: "06:00", shiftHours: 8, rotations: 4 },
     stations,
     operators: [
-      op("o1", "Marie Laurent", [q("rec", "all"), q("pre", "all"), q("exp", "all"), q("qua", "all")]),
+      op("o1", "Marie Laurent", [q("rec", "all"), q("pre", "all"), q("exp", "all"), q("qua", "all", true, addMonths(daysAgo(-8), -2))]),
       op("o2", "Karim Benali", [q("cha", "all"), q("rec", "all"), q("exp", "all")]),
       op("o3", "Sophie Muller", [q("qua", "all"), q("pre", "all")]),
       op("o4", "Lucas Weber", [q("pre", "all"), q("cha", "all", false)]),
       op("o5", "Ana Ferreira", [q("pre", "all"), q("exp", "all"), q("qua", 1)]),
-      op("o6", "Thomas Klein", [q("cha", "all"), q("rec", "all"), q("pre", "all")]),
+      op("o6", "Thomas Klein", [q("cha", "all"), q("rec", "all", true, addMonths(daysAgo(5), -2)), q("pre", "all")]),
       op("o7", "Julie Schmit", [q("pre", "all"), q("rec", 3)]),
       op("o8", "Nicolas Roth", [q("exp", "all"), q("pre", "all"), q("cha", 2)]),
     ],

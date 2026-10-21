@@ -70,11 +70,13 @@ function gapReason(st: Station, ops: Operator[], taken: Set<string>) {
   const names = (list: Operator[]) => list.map((o) => o.name).join(", ");
   const absent = ops.filter((o) => o.absent && canWork(o, st));
   const unsigned = ops.filter((o) => !o.absent && statusOf(o, st) === "unsigned");
+  const expired = ops.filter((o) => !o.absent && statusOf(o, st) === "expired");
   const busy = ops.filter((o) => !o.absent && canWork(o, st) && taken.has(o.id));
   const parts: string[] = [];
   if (absent.length) parts.push(`habilité absent : ${names(absent)}`);
   if (busy.length) parts.push(`déjà sur un autre poste : ${names(busy)}`);
   if (unsigned.length) parts.push(`formé mais papier non signé : ${names(unsigned)}`);
+  if (expired.length) parts.push(`audit d'habilitation dépassé : ${names(expired)}`);
   return parts.length ? parts.join(" ; ") : "personne n'est habilité sur ce poste";
 }
 

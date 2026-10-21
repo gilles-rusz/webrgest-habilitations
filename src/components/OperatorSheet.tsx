@@ -1,8 +1,8 @@
 "use client";
 
-import { AlertTriangle, Check, ChevronDown, FileSignature, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ClipboardCheck, FileSignature, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { fmtDate, newQual, progress, qualStatus, today } from "@/lib/model";
+import { daysLeft, dueSoon, expiryOf, fmtDate, newQual, progress, qualStatus, today, validityOf } from "@/lib/model";
 import { useStore } from "@/lib/store";
 import { CATEGORY_STYLE, type Operator, type Qualification } from "@/lib/types";
 import { BottomSheet } from "./BottomSheet";
@@ -40,8 +40,12 @@ export function OperatorSheet({ id, onClose }: { id: string | null; onClose: () 
           const status = qualStatus(q, st);
           const done = progress(q, st);
           const isOpen = openSt === st.id;
+          const end = expiryOf(q, st);
+          const left = daysLeft(q, st);
+          const soon = dueSoon(q, st);
+          const renew = () => editQual(st.id, (x) => ({ ...x, signed: true, signedAt: today(), validatedAt: today() }));
           return (
-            <div key={st.id} className={`rounded-2xl border ${status === "unsigned" ? "border-red-300" : "border-slate-200"}`}>
+            <div key={st.id} className={`rounded-2xl border ${status === "unsigned" || status === "expired" ? "border-red-300" : soon ? "border-orange-300" : "border-slate-200"}`}>
               <button onClick={() => setOpenSt(isOpen ? null : st.id)} className="flex w-full items-center gap-3 p-3 text-left">
                 <div className="min-w-0 flex-1">
                   <p className="font-bold">{st.name}</p>
@@ -57,6 +61,16 @@ export function OperatorSheet({ id, onClose }: { id: string | null; onClose: () 
               {status === "unsigned" && !isOpen && (
                 <p className="mx-3 mb-3 flex items-start gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
                   <AlertTriangle size={16} className="mt-0.5 shrink-0" /> Papier non signé : ne peut pas travailler sur ce poste.
+                </p>
+              )}
+              {status === "expired" && !isOpen && (
+                <p className="mx-3 mb-3 flex items-start gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" /> Habilitation expirée le {fmtDate(end)} : nouvel audit nécessaire.
+                </p>
+              )}
+              {soon && !isOpen && (
+                <p className="mx-3 mb-3 flex items-start gap-1.5 rounded-xl bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-800">
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" /> Audit à refaire avant le {fmtDate(end)}.
                 </p>
               )}
 
@@ -121,11 +135,33 @@ export function OperatorSheet({ id, onClose }: { id: string | null; onClose: () 
                       </button>
                     </div>
                   )}
+                  {status === "expired" && (
+                    <div className="rounded-xl border border-red-300 bg-red-50 p-3">
+                      <p className="flex items-start gap-1.5 text-sm font-bold text-red-700">
+                        <AlertTriangle size={18} className="shrink-0" />
+                        {`Habilitation expirée le ${fmtDate(end)} (audit tous les ${validityOf(st)} mois). ${op.name} ne peut plus travailler sur ce poste avant un nouvel audit.`}
+                      </p>
+                      <button onClick={renew} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-600 font-bold text-white active:bg-red-700">
+                        <ClipboardCheck size={20} /> Audit refait, papier signé
+                      </button>
+                    </div>
+                  )}
+                  {status === "ok" && soon && (
+                    <div className="rounded-xl border border-orange-300 bg-orange-50 p-3">
+                      <p className="text-sm font-bold text-orange-800">
+                        {`Audit à prévoir : l'habilitation ne sera plus valide le ${fmtDate(end)} (${left === 0 ? "aujourd'hui" : left === 1 ? "demain" : `dans ${left} jours`}).`}
+                      </p>
+                      <button onClick={renew} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 font-bold text-white active:bg-orange-600">
+                        <ClipboardCheck size={20} /> Audit refait, papier signé
+                      </button>
+                    </div>
+                  )}
                   {status === "ok" && (
                     <div className="flex items-center justify-between gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
                       <span>
                         Habilitation signée le {fmtDate(q.signedAt)}
                         {q.validatedBy && `, validée par ${q.validatedBy}`}
+                        {end && `. Valable jusqu'au ${fmtDate(end)}`}
                       </span>
                       <button onClick={() => editQual(st.id, (x) => ({ ...x, signed: false, signedAt: null }))} className="shrink-0 text-xs font-bold text-emerald-700 underline">
                         Annuler

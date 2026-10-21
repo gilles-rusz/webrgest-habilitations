@@ -15,6 +15,9 @@ export function Planning() {
   const unsigned = operators
     .filter((o) => !o.absent)
     .flatMap((o) => stations.filter((s) => statusOf(o, s) === "unsigned").map((s) => `${o.name} (${s.name})`));
+  const expired = operators
+    .filter((o) => !o.absent)
+    .flatMap((o) => stations.filter((s) => statusOf(o, s) === "expired").map((s) => `${o.name} (${s.name})`));
   const set = (patch: Partial<typeof settings>) => update((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
 
   return (
@@ -88,6 +91,14 @@ export function Planning() {
           <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           <span>
             <strong>Pas planifiés car papier non signé :</strong> {unsigned.join(", ")}.
+          </span>
+        </p>
+      )}
+      {expired.length > 0 && (
+        <p className="flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-sm text-amber-900">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <span>
+            <strong>Pas planifiés car audit dépassé :</strong> {expired.join(", ")}.
           </span>
         </p>
       )}

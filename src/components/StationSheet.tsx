@@ -19,7 +19,7 @@ export function StationSheet({ id, onClose }: { id: string | null; onClose: () =
     .sort((a, b) => a.o.name.localeCompare(b.o.name));
 
   return (
-    <BottomSheet open onClose={onClose} title={st.name || "Poste"}>
+    <BottomSheet open onClose={onClose} validate="Valider" title={st.name || "Poste"}>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <label className="mb-1 block text-sm font-semibold text-slate-500">Nom du poste</label>

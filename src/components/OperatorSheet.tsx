@@ -22,7 +22,7 @@ export function OperatorSheet({ id, onClose }: { id: string | null; onClose: () 
   const free = stations.filter((s) => !op.quals.some((q) => q.stationId === s.id));
 
   return (
-    <BottomSheet open onClose={onClose} title={op.name || "Opérateur"}>
+    <BottomSheet open onClose={onClose} validate="Valider" title={op.name || "Opérateur"}>
       <label className="mb-1 block text-sm font-semibold text-slate-500" htmlFor="opname">
         Nom
       </label>

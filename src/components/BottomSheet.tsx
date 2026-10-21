@@ -1,9 +1,21 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 
-export function BottomSheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function BottomSheet({
+  open,
+  onClose,
+  title,
+  children,
+  validate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  validate?: string;
+}) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -34,6 +46,16 @@ export function BottomSheet({ open, onClose, title, children }: { open: boolean;
           </button>
         </div>
         {children}
+        {validate && (
+          <div className="sticky bottom-0 -mx-5 mt-5 border-t border-slate-100 bg-white/95 px-5 pt-3 backdrop-blur">
+            <button
+              onClick={onClose}
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 text-base font-bold text-white shadow-sm active:bg-teal-700"
+            >
+              <Check size={22} strokeWidth={2.5} /> {validate}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

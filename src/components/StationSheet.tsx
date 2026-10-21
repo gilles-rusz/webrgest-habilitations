@@ -1,7 +1,7 @@
 "use client";
 
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { statusOf, uid } from "@/lib/model";
+import { statusOf, uid, validityOf } from "@/lib/model";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, type Category, type Station } from "@/lib/types";
 import { BottomSheet } from "./BottomSheet";
@@ -41,6 +41,26 @@ export function StationSheet({ id, onClose }: { id: string | null; onClose: () =
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="mt-3">
+        <label className="mb-1 block text-sm font-semibold text-slate-500" htmlFor="validity">
+          Audit d&apos;habilitation à refaire tous les
+        </label>
+        <select
+          id="validity"
+          value={validityOf(st)}
+          onChange={(e) => edit((s) => ({ ...s, validityMonths: Number(e.target.value) }))}
+          className={input}
+        >
+          {[1, 2, 3, 6, 12, 24].map((m) => (
+            <option key={m} value={m}>
+              {m} mois
+            </option>
+          ))}
+          <option value={0}>Jamais (pas d&apos;échéance)</option>
+        </select>
+        <p className="mt-1 text-xs text-slate-500">Compté à partir de la signature. Une alerte s&apos;affiche 15 jours avant l&apos;échéance.</p>
       </div>
 
       <h3 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-slate-500">Points à contrôler</h3>

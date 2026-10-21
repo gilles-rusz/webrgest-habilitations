@@ -2,7 +2,7 @@
 
 import { AlertTriangle, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
-import { canWork, uid } from "@/lib/model";
+import { canWork, uid, validityOf } from "@/lib/model";
 import { useStore } from "@/lib/store";
 import { input } from "./ui";
 
@@ -15,7 +15,7 @@ export function Stations({ open }: { open: (id: string) => void }) {
     const n = name.trim();
     if (!n) return;
     const id = uid();
-    update((s) => ({ ...s, stations: [...s.stations, { id, name: n, standard: "", needed: 1, points: [] }] }));
+    update((s) => ({ ...s, stations: [...s.stations, { id, name: n, standard: "", needed: 1, points: [], validityMonths: 2 }] }));
     setName("");
     open(id);
   }
@@ -32,7 +32,7 @@ export function Stations({ open }: { open: (id: string) => void }) {
               <p className="font-bold">{s.name}</p>
               <p className="text-xs text-slate-500">
                 {s.standard && `${s.standard}, `}
-                {s.points.length} points à contrôler, effectif {s.needed}
+                {s.points.length} points à contrôler, effectif {s.needed}, audit {validityOf(s) ? `tous les ${validityOf(s)} mois` : "sans échéance"}
               </p>
               <p className={`mt-1.5 text-sm font-semibold ${margin < 0 ? "text-red-600" : margin === 0 ? "text-amber-700" : "text-emerald-700"}`}>
                 {ok} personne{ok > 1 ? "s" : ""} habilitée{ok > 1 ? "s" : ""}

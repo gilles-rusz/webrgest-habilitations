@@ -3,7 +3,14 @@ export type Category = (typeof CATEGORIES)[number];
 
 export type Point = { id: string; label: string; category: Category };
 
-export type Station = { id: string; name: string; standard: string; needed: number; points: Point[] };
+export type Station = {
+  id: string;
+  name: string;
+  standard: string;
+  needed: number;
+  points: Point[];
+  validityMonths?: number;
+};
 
 export type Qualification = {
   stationId: string;
@@ -20,12 +27,13 @@ export type Settings = { site: string; shiftStart: string; shiftHours: number; r
 
 export type State = { settings: Settings; stations: Station[]; operators: Operator[] };
 
-export type Status = "training" | "unsigned" | "ok";
+export type Status = "training" | "unsigned" | "ok" | "expired";
 
 export const STATUS_LABEL: Record<Status, string> = {
   training: "En formation",
   unsigned: "Papier non signé",
   ok: "Habilité",
+  expired: "Audit dépassé",
 };
 
 export const CATEGORY_STYLE: Record<Category, string> = {

@@ -3,7 +3,7 @@
 import { CalendarClock, ClipboardList, Grid3x3, LogOut, Menu, Users } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { unsignedCount } from "@/lib/model";
+import { alertCount } from "@/lib/model";
 import { buildPlanning } from "@/lib/planning";
 import { useStore } from "@/lib/store";
 import { BottomSheet } from "./BottomSheet";
@@ -55,7 +55,7 @@ function Workspace({ session, onLogout }: { session: Session | null; onLogout: (
   const [op, setOp] = useState<string | null>(null);
   const [st, setSt] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
-  const unsigned = unsignedCount(store.operators, store.stations);
+  const unsigned = alertCount(store.operators, store.stations);
   const gaps = useMemo(
     () => buildPlanning(store.stations, store.operators, store.settings).reduce((n, s) => n + s.gaps.length, 0),
     [store.stations, store.operators, store.settings],
